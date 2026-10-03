@@ -77,6 +77,7 @@ button:hover {
   max-height: 250px;
   overflow-y: auto;
   border: 1px solid #1e293b;
+  white-space: pre-wrap;
 }
 
 .loader {
@@ -109,26 +110,10 @@ button:hover {
   <h1>🔥 LEO MODZ</h1>
 
   <div class="input-group">
-    <input type="text" id="name" placeholder="Nome (ex: LEO)">
+    <input type="text" id="message" placeholder="Digite sua mensagem/pedido para a IA">
   </div>
 
-  <div class="input-group">
-    <input type="number" id="count" placeholder="Quantidade (max 15)" max="15">
-  </div>
-
-  <div class="input-group">
-    <select id="region">
-      <option value="BR">Brasil</option>
-      <option value="IND">Índia</option>
-      <option value="NA">América do Norte</option>
-      <option value="EU">Europa</option>
-      <option value="RU">Rússia</option>
-      <option value="TH">Tailândia</option>
-      <option value="ID">Indonésia</option>
-    </select>
-  </div>
-
-  <button onclick="gerar()">GERAR CONTAS</button>
+  <button onclick="gerar()">ENVIAR PARA API</button>
 
   <div id="resultado">Aguardando...</div>
 
@@ -140,46 +125,35 @@ button:hover {
 
 <script>
 async function gerar() {
-  const name = document.getElementById("name").value || "TESTE";
-  const count = document.getElementById("count").value || 1;
-  const region = document.getElementById("region").value;
+  const message = document.getElementById("message").value || "Olá";
+  const apiKey = "LEOMODZ"; // Chave definida no seu index.py
 
-  const api = `https://apiguest.onrender.com/gen?name=${name}&count=${count}&region=${region}`;
-  
-  // 🔥 PROXY CORS
-  const url = "https://api.allorigins.win/raw?url=" + encodeURIComponent(api);
+  // URL apontando para a sua rota /ask configurada no Flask
+  const api = `https://apiguest.onrender.com/ask?message=${encodeURIComponent(message)}&key=${apiKey}`;
 
   const resultBox = document.getElementById("resultado");
   resultBox.innerHTML = '<div class="loader"></div>';
 
   try {
-    const res = await fetch(url);
+    const res = await fetch(api);
+    const data = await res.json();
 
-    if (!res.ok) throw new Error("Erro na API");
-
-    const text = await res.text();
-    const data = JSON.parse(text);
-
-    if (!data.accounts || data.accounts.length === 0) {
-      resultBox.innerText = "❌ Nenhuma conta gerada";
-      return;
+    if (!res.ok) {
+      throw new Error(data.error || "Erro desconhecido na API");
     }
 
-    let texto = "";
-
-    data.accounts.forEach((acc, i) => {
-      texto += `🔥 Conta ${i+1}\nUID: ${acc.uid}\n\n`;
-    });
-
-    resultBox.innerText = texto;
+    if (data.reply) {
+      resultBox.innerText = `🤖 Resposta:\n\n${data.reply}`;
+    } else {
+      resultBox.innerText = "❌ Resposta vazia da API";
+    }
 
   } catch (err) {
     resultBox.innerText =
-      "❌ Erro ao gerar contas\n\n" +
+      "❌ Erro ao comunicar com a API\n\n" +
       "Possíveis causas:\n" +
-      "- API offline\n" +
-      "- Proxy lento\n" +
-      "- Internet ruim\n\n" +
+      "- API offline ou em hibernação no Render\n" +
+      "- Chave incorreta\n\n" +
       "Erro: " + err.message;
   }
 }
