@@ -144,7 +144,7 @@ async function gerar() {
   const count = document.getElementById("count").value || 1;
   const region = document.getElementById("region").value;
 
-  const api = `https://leomdzguestapi.vercel.app/gen?name=${name}&count=${count}&region=${region}`;
+  const api = `https://apiguest.onrender.com/gen?name=${name}&count=${count}&region=${region}`;
   
   // 🔥 PROXY CORS
   const url = "https://api.allorigins.win/raw?url=" + encodeURIComponent(api);
