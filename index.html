@@ -110,10 +110,26 @@ button:hover {
   <h1>🔥 LEO MODZ</h1>
 
   <div class="input-group">
-    <input type="text" id="message" placeholder="Digite sua mensagem/pedido para a IA">
+    <input type="text" id="name" placeholder="Nome (ex: LEO)">
   </div>
 
-  <button onclick="gerar()">ENVIAR PARA API</button>
+  <div class="input-group">
+    <input type="number" id="count" placeholder="Quantidade (max 15)" max="15">
+  </div>
+
+  <div class="input-group">
+    <select id="region">
+      <option value="Brasil">Brasil</option>
+      <option value="Índia">Índia</option>
+      <option value="América do Norte">América do Norte</option>
+      <option value="Europa">Europa</option>
+      <option value="Rússia">Rússia</option>
+      <option value="Tailândia">Tailândia</option>
+      <option value="Indonésia">Indonésia</option>
+    </select>
+  </div>
+
+  <button onclick="gerar()">GERAR CONTAS</button>
 
   <div id="resultado">Aguardando...</div>
 
@@ -125,10 +141,13 @@ button:hover {
 
 <script>
 async function gerar() {
-  const message = document.getElementById("message").value || "Olá";
-  const apiKey = "LEOMODZ"; // Chave definida no seu index.py
+  const name = document.getElementById("name").value || "TESTE";
+  const count = document.getElementById("count").value || 1;
+  const region = document.getElementById("region").value;
 
-  // URL apontando para a sua rota /ask configurada no Flask
+  const message = `Gere ${count} contas fictícias de Free Fire para o nome ${name} na região ${region}. Liste os UIDs gerados.`;
+  const apiKey = "LEOMODZ";
+
   const api = `https://apiguest.onrender.com/ask?message=${encodeURIComponent(message)}&key=${apiKey}`;
 
   const resultBox = document.getElementById("resultado");
@@ -139,22 +158,22 @@ async function gerar() {
     const data = await res.json();
 
     if (!res.ok) {
-      throw new Error(data.error || "Erro desconhecido na API");
+      throw new Error(data.error || "Erro na resposta da API");
     }
 
     if (data.reply) {
-      resultBox.innerText = `🤖 Resposta:\n\n${data.reply}`;
+      resultBox.innerText = data.reply;
     } else {
-      resultBox.innerText = "❌ Resposta vazia da API";
+      resultBox.innerText = "❌ Nenhuma resposta recebida.";
     }
 
   } catch (err) {
     resultBox.innerText =
       "❌ Erro ao comunicar com a API\n\n" +
-      "Possíveis causas:\n" +
-      "- API offline ou em hibernação no Render\n" +
-      "- Chave incorreta\n\n" +
-      "Erro: " + err.message;
+      "Motivos possíveis:\n" +
+      "- A API ainda está a atualizar no Render (aguarde 1 minuto)\n" +
+      "- Servidor offline\n\n" +
+      "Detalhes: " + err.message;
   }
 }
 </script>
